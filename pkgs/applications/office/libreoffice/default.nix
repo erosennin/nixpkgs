@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, pam, python3, libxslt, perl, ArchiveZip, gettext
+{ stdenv, fetchurl, fetchpatch, pam, python3, libxslt, perl, ArchiveZip, gettext
 , CompressZlib, zlib, libjpeg, expat, pkgconfigUpstream, freetype, libwpd
 , libxml2, db, sablotron, curl, fontconfig, libsndfile, neon
 , bison, flex, zip, unzip, gtk3, gtk2, libmspack, getopt, file, cairo, which
@@ -73,7 +73,15 @@ in stdenv.mkDerivation rec {
   configureScript = "./autogen.sh";
   dontUseCmakeConfigure = true;
 
-  patches = [ ./xdg-open-brief.patch ];
+  patches = [
+    ./xdg-open-brief.patch
+
+    # fix build with poppler 0.64
+    (fetchpatch {
+      url = "https://cgit.freedesktop.org/libreoffice/core/patch/sdext/source/pdfimport/xpdfwrapper?id=42cebff14f7d486c20f04863681cc5ef4602f4eb";
+      sha256 = "1lrhprxv0r3vs6pfgkl5mf0l3scy2sgq3zi07d9f980k6b353rp6";
+    })
+  ];
 
   postUnpack = ''
     mkdir -v $sourceRoot/src
