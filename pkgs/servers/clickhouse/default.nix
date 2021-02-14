@@ -9,6 +9,7 @@
 , fetchFromGitHub
 , grpc
 , gsasl
+, hyperscan
 , icu
 , libkrb5
 , libmysqlclient
@@ -68,6 +69,7 @@ buildStdenv.mkDerivation rec {
     double-conversion
     grpc
     gsasl
+    hyperscan
     icu
     libkrb5
     libmysqlclient
@@ -111,8 +113,8 @@ buildStdenv.mkDerivation rec {
 
   cmakeFlags = [
     "-DUNBUNDLED=ON"
+    "-DCMAKE_INCLUDE_PATH=${hyperscan.dev}/include/hs"
     "-DUSE_INTERNAL_FARMHASH_LIBRARY=ON"
-    "-DUSE_INTERNAL_HYPERSCAN_LIBRARY=ON"
     "-DENABLE_PARQUET=OFF"
     "-DENABLE_AVRO=OFF"
     "-DENABLE_TESTS=OFF"
