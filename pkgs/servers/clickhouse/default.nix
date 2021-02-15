@@ -12,7 +12,6 @@
 , gsasl
 , hyperscan
 , icu
-, libkrb5
 , libmysqlclient
 , libxml2
 , llvmPackages_10
@@ -73,7 +72,6 @@ buildStdenv.mkDerivation rec {
     gsasl
     hyperscan
     icu
-    libkrb5
     libmysqlclient
     libxml2
     llvmPackages_10.llvm
