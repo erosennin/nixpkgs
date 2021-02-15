@@ -1,6 +1,7 @@
 { lib
 , overrideCC
 , boost17x
+, brotli
 , capnproto
 , cctz
 , cmake
@@ -63,6 +64,7 @@ buildStdenv.mkDerivation rec {
   ];
   buildInputs = [
     boost17x
+    brotli
     capnproto
     cctz
     cyrus_sasl
@@ -114,6 +116,8 @@ buildStdenv.mkDerivation rec {
   cmakeFlags = [
     "-DUNBUNDLED=ON"
     "-DCMAKE_INCLUDE_PATH=${hyperscan.dev}/include/hs"
+    "-DUSE_INTERNAL_BROTLI_LIBRARY=OFF"
+
     "-DUSE_INTERNAL_FARMHASH_LIBRARY=ON"
     "-DENABLE_PARQUET=OFF"
     "-DENABLE_AVRO=OFF"
