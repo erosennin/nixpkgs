@@ -129,6 +129,9 @@ buildStdenv.mkDerivation rec {
     "-DWERROR=OFF"
   ];
 
+  preBuild = ''
+    export TERM=dumb
+  '';
   postInstall = ''
     rm -rf $out/share/clickhouse-test
 
