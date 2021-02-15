@@ -111,6 +111,12 @@ buildStdenv.mkDerivation rec {
     done
   '';
 
+  # ClickHouse includes compiler and linker paths into the generated file, this
+  # makes the package unnecessarily depend on clang.
+  postConfigure = ''
+    sed -ie 's|/nix/store/[^/]*/bin/||' src/Storages/System/StorageSystemBuildOptions.generated.cpp
+  '';
+
   cmakeFlags = [
     "-DUNBUNDLED=ON"
     "-DCMAKE_INCLUDE_PATH=${hyperscan.dev}/include/hs"
@@ -131,6 +137,8 @@ buildStdenv.mkDerivation rec {
     substituteInPlace $out/etc/clickhouse-server/config.xml \
       --replace "<errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>" "<console>1</console>"
   '';
+
+  disallowedReferences = [ buildStdenv.cc ];
 
   hardeningDisable = [ "format" ];
 
