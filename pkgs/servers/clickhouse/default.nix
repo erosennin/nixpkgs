@@ -16,7 +16,6 @@
 , libxml2
 , llvmPackages_10
 , llvmPackages_11
-, lz4
 , lzma
 , msgpack
 , ncurses
@@ -75,7 +74,6 @@ buildStdenv.mkDerivation rec {
     libmysqlclient
     libxml2
     llvmPackages_10.llvm
-    lz4
     lzma
     msgpack
     ncurses
@@ -121,6 +119,9 @@ buildStdenv.mkDerivation rec {
     "-DUNBUNDLED=ON"
     "-DCMAKE_INCLUDE_PATH=${hyperscan.dev}/include/hs"
     "-DUSE_INTERNAL_BROTLI_LIBRARY=OFF"
+
+    # For some reason, using external lz4 disables implies USE_XXHASH=OFF.
+    "-DUSE_INTERNAL_LZ4_LIBRARY=ON"
 
     "-DUSE_INTERNAL_FARMHASH_LIBRARY=ON"
     "-DENABLE_PARQUET=OFF"
