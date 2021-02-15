@@ -107,7 +107,7 @@ buildStdenv.mkDerivation rec {
       utils/generate-ya-make/generate-ya-make.sh \
       utils/list-licenses/list-licenses.sh
     do
-      substituteInPlace "$script"  --replace '$(git rev-parse --show-toplevel)' '${src}'
+      substituteInPlace "$script"  --replace '$(git rev-parse --show-toplevel)' "$NIX_BUILD_TOP/$sourceRoot"
     done
   '';
 
