@@ -1,7 +1,9 @@
 { lib
 , overrideCC
+, arrow-cpp
 , boost17x
 , brotli
+, bzip2
 , capnproto
 , cctz
 , cmake
@@ -14,7 +16,6 @@
 , icu
 , libmysqlclient
 , libxml2
-, llvmPackages_10
 , llvmPackages_11
 , lzma
 , msgpack
@@ -33,12 +34,13 @@
 , stdenv
 , thrift
 , unixODBC
+, utf8proc
 , zlib
 , zstd
 }:
 
 let
-  buildStdenv = overrideCC stdenv llvmPackages_11.lldClangNoLibcxx;
+  buildStdenv = llvmPackages_11.stdenv;
   # buildStdenv = stdenv;
 in
 buildStdenv.mkDerivation rec {
@@ -61,8 +63,11 @@ buildStdenv.mkDerivation rec {
     perl
   ];
   buildInputs = [
+    (llvmPackages_11.llvm.override { enableSharedLibraries = true; })
+    arrow-cpp
     boost17x
     brotli
+    bzip2
     capnproto
     cctz
     cyrus_sasl
@@ -73,7 +78,6 @@ buildStdenv.mkDerivation rec {
     icu
     libmysqlclient
     libxml2
-    llvmPackages_10.llvm
     lzma
     msgpack
     ncurses
@@ -86,6 +90,7 @@ buildStdenv.mkDerivation rec {
     snappy
     thrift
     unixODBC
+    utf8proc
     zlib
     zstd
   ];
@@ -107,6 +112,11 @@ buildStdenv.mkDerivation rec {
     do
       substituteInPlace "$script"  --replace '$(git rev-parse --show-toplevel)' "$NIX_BUILD_TOP/$sourceRoot"
     done
+
+    substituteInPlace cmake/find/llvm.cmake --replace 'llvm_v 10 9 8' 'llvm_v 11'
+    echo 'set (REQUIRED_LLVM_LIBRARIES "LLVM-''${LLVM_VERSION_MAJOR}")' >>cmake/find/llvm.cmake
+
+    echo 'dbms_target_link_libraries(PRIVATE ''${ARROW_LIBRARY})' >> src/CMakeLists.txt
   '';
 
   # ClickHouse includes compiler and linker paths into the generated file, this
@@ -116,18 +126,31 @@ buildStdenv.mkDerivation rec {
   '';
 
   cmakeFlags = [
+    # Use system libraries instead of the bundled ones.
     "-DUNBUNDLED=ON"
+
+    # ClickHouse is having troubles finding hs.h ni the hs/ subdirectory.
     "-DCMAKE_INCLUDE_PATH=${hyperscan.dev}/include/hs"
-    "-DUSE_INTERNAL_BROTLI_LIBRARY=OFF"
 
     # For some reason, using external lz4 disables implies USE_XXHASH=OFF.
     "-DUSE_INTERNAL_LZ4_LIBRARY=ON"
 
+    # Not in nixpkgs yet.
     "-DUSE_INTERNAL_FARMHASH_LIBRARY=ON"
-    "-DENABLE_PARQUET=OFF"
+
+    # Use shared system libraries.
+    "-DUSE_STATIC_LIBRARIES=OFF"
+
+    # Link internal ClickHouse libraries statically. Dynamic linking seems
+    # untested and broken.
+    "-DMAKE_STATIC_LIBRARIES=ON"
+
+    # Bundled Avro fails to compile:
+    # error: unknown type name 'size_t'; did you mean 'std::size_t'?
+    # Using external Avro is not supported yet.
     "-DENABLE_AVRO=OFF"
+
     "-DENABLE_TESTS=OFF"
-    "-DWERROR=OFF"
   ];
 
   preBuild = ''
