@@ -192,6 +192,8 @@ in
 
   castxml = callPackage ../development/tools/castxml { };
 
+  catatonit = callPackage ../applications/virtualization/catatonit { };
+
   cen64 = callPackage ../misc/emulators/cen64 { };
 
   cereal = callPackage ../development/libraries/cereal { };
